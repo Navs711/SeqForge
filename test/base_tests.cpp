@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-// ===== Your project functions =====
+// ===== project functions =====
 bool validateDNA(string dna);
 string extractSTR(string dna, string LF, string RF);
 int countRepeats(string str, string motif);
