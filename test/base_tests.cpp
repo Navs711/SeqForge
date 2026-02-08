@@ -3,141 +3,130 @@
 #include <iostream>
 using namespace std;
 
-// ===== project functions =====
+// =====  project functions  =====
+
 bool validateDNA(string dna);
 string extractSTR(string dna, string LF, string RF);
 int countRepeats(string str, string motif);
 double smithWaterman(string s1, string s2);
 string detectRelationship(double sim);
-// ==================================
 
-const string LF = "TGGGCTGAGGCTGAGTGC";
-const string RF = "CCTATGACCATGTAGACC";
-const string MOTIF = "AGAT";
+// ==========================================================
 
-// ------------------------------------------------------------
-// DNA VALIDATION TESTS
-// ------------------------------------------------------------
-void testDNAValidation() {
-    assert(validateDNA("ATGCAGATAGAT") == true);
-    assert(validateDNA("ATGC12@#") == false);
-    assert(validateDNA("") == false);
-}
+namespace D3S1358Tests {
 
-// ------------------------------------------------------------
-// FLANK & STR EXTRACTION TESTS
-// ------------------------------------------------------------
-void testFlankExtraction() {
-    string dna1 = LF + "AGATAGATAGAT" + RF;
-    assert(extractSTR(dna1, LF, RF) == "AGATAGATAGAT");
+    const string LF = "TGGGCTGAGGCTGAGTGC";
+    const string RF = "CCTATGACCATGTAGACC";
+    const string MOTIF = "AGAT";
 
-    string dna2 = LF + "AGATAGATAGAT";  // missing RF
-    assert(extractSTR(dna2, LF, RF).empty());
+    // ---------------- DNA VALIDATION ----------------
+    void DNAValidation() {
+        assert(validateDNA("ATGCAGATAGAT") == true);
+        assert(validateDNA("ATGC12@#") == false);
+        assert(validateDNA("") == false);
+    }
 
-    string dna3 = "AGATAGAT" + RF;     // missing LF
-    assert(extractSTR(dna3, LF, RF).empty());
+    // ---------------- FLANK & STR EXTRACTION ----------------
+    void FlankExtraction() {
+        string dna1 = LF + "AGATAGATAGAT" + RF;
+        assert(extractSTR(dna1, LF, RF) == "AGATAGATAGAT");
 
-    string dna4 = RF + LF + "AGATAGAT" + RF;
-    assert(extractSTR(dna4, LF, RF) == "AGATAGAT");
-}
+        string dna2 = LF + "AGATAGATAGAT";
+        assert(extractSTR(dna2, LF, RF).empty());
 
-// ------------------------------------------------------------
-// STR PATTERN TESTS
-// ------------------------------------------------------------
-void testSTRPatterns() {
-    string dna5 = LF + "AGATAGATAGATAGAT" + RF;
-    assert(extractSTR(dna5, LF, RF) == "AGATAGATAGATAGAT");
+        string dna3 = "AGATAGAT" + RF;
+        assert(extractSTR(dna3, LF, RF).empty());
 
-    string dna6 = LF + "AGATAGTTAGAT" + RF;
-    assert(extractSTR(dna6, LF, RF) == "AGATAGTTAGAT");
+        string dna4 = RF + LF + "AGATAGAT" + RF;
+        assert(extractSTR(dna4, LF, RF) == "AGATAGAT");
+    }
 
-    string dna7 = LF + RF;
-    assert(extractSTR(dna7, LF, RF).empty());
-}
+    // ---------------- STR PATTERNS ----------------
+    void STRPatterns() {
+        string dna5 = LF + "AGATAGATAGATAGAT" + RF;
+        assert(extractSTR(dna5, LF, RF) == "AGATAGATAGATAGAT");
 
-// ------------------------------------------------------------
-// MULTIPLE LOCI TEST
-// ------------------------------------------------------------
-void testMultipleLoci() {
-    string dnaA = LF + "AGATAGATAGAT" + RF;
-    string dnaB = LF + "AGATAGATAGATAGAT" + RF;
-    string dna = dnaA + "ATCGATCG" + dnaB;
+        string dna6 = LF + "AGATAGTTAGAT" + RF;
+        assert(extractSTR(dna6, LF, RF) == "AGATAGTTAGAT");
 
-    assert(extractSTR(dna, LF, RF) == "AGATAGATAGAT");
-}
+        string dna7 = LF + RF;
+        assert(extractSTR(dna7, LF, RF).empty());
+    }
 
-// ------------------------------------------------------------
-// REPEAT COUNTING TESTS
-// ------------------------------------------------------------
-void testRepeatCounting() {
-    assert(countRepeats("AGATAGATAGAT", MOTIF) == 3);
-    assert(countRepeats("AGATAGTTAGAT", MOTIF) == 1);
+    // ---------------- MULTIPLE LOCI ----------------
+    void MultipleLoci() {
+        string dnaA = LF + "AGATAGATAGAT" + RF;
+        string dnaB = LF + "AGATAGATAGATAGAT" + RF;
+        string dna = dnaA + "ATCGATCG" + dnaB;
 
-    string longSTR;
-    for(int i = 0; i < 50; i++)
-        longSTR += MOTIF;
+        assert(extractSTR(dna, LF, RF) == "AGATAGATAGAT");
+    }
 
-    assert(countRepeats(longSTR, MOTIF) == 50);
-}
+    // ---------------- REPEAT COUNTING ----------------
+    void RepeatCounting() {
+        assert(countRepeats("AGATAGATAGAT", MOTIF) == 3);
+        assert(countRepeats("AGATAGTTAGAT", MOTIF) == 1);
 
-// ------------------------------------------------------------
-// SMITH WATERMAN TESTS
-// ------------------------------------------------------------
-void testSmithWaterman() {
-    assert(smithWaterman("AGATAGAT", "AGATAGAT") == 100.0);
-    assert(smithWaterman("AGATAGAT", "AGATAGATAGAT") > 70.0);
-    assert(smithWaterman("AGATAGAT", "AGTTAGAT") < 90.0);
-    assert(smithWaterman("AGATAGAT", "TTTTCCCC") < 30.0);
-}
+        string longSTR;
+        for(int i = 0; i < 50; i++)
+            longSTR += MOTIF;
 
-// ------------------------------------------------------------
-// RELATIONSHIP DETECTION TESTS
-// ------------------------------------------------------------
-void testRelationshipDetection() {
-    assert(detectRelationship(100.0) == "Same Person");
-    assert(detectRelationship(75.0) == "Father-Son");
-    assert(detectRelationship(55.0) == "Siblings");
-    assert(detectRelationship(20.0) == "Unrelated");
-}
+        assert(countRepeats(longSTR, MOTIF) == 50);
+    }
 
-// ------------------------------------------------------------
-// REAL LOCUS SCENARIO TEST
-// ------------------------------------------------------------
-void testRealLocusScenario() {
-    string realDNA = LF + "AGATAGATAGATAGATAGAT" + RF;
-    string str = extractSTR(realDNA, LF, RF);
+    // ---------------- SMITH WATERMAN ----------------
+    void SmithWatermanTests() {
+        assert(smithWaterman("AGATAGAT", "AGATAGAT") == 100.0);
+        assert(smithWaterman("AGATAGAT", "AGATAGATAGAT") > 70.0);
+        assert(smithWaterman("AGATAGAT", "AGTTAGAT") < 90.0);
+        assert(smithWaterman("AGATAGAT", "TTTTCCCC") < 30.0);
+    }
 
-    assert(!str.empty());
-    assert(smithWaterman(str, "AGATAGATAGATAGAT") > 70.0);
-    assert(smithWaterman(str, "TTTTCCCC") < 30.0);
-}
+    // ---------------- RELATIONSHIP DETECTION ----------------
+    void RelationshipDetection() {
+        assert(detectRelationship(100.0) == "Same Person");
+        assert(detectRelationship(75.0) == "Father-Son");
+        assert(detectRelationship(55.0) == "Siblings");
+        assert(detectRelationship(20.0) == "Unrelated");
+    }
 
-// ------------------------------------------------------------
-// BOUNDARY & ERROR TESTS
-// ------------------------------------------------------------
-void testBoundaryCases() {
-    string realDNA = LF + "AGATAGATAGATAGAT" + RF;
+    // ---------------- REAL LOCUS SCENARIO ----------------
+    void RealLocusScenario() {
+        string realDNA = LF + "AGATAGATAGATAGATAGAT" + RF;
+        string str = extractSTR(realDNA, LF, RF);
 
-    assert(extractSTR("", LF, RF).empty());
-    assert(extractSTR(realDNA, "", "").empty());
-    assert(extractSTR("AGAT", LF, RF).empty());
-}
+        assert(!str.empty());
+        assert(smithWaterman(str, "AGATAGATAGATAGAT") > 70.0);
+        assert(smithWaterman(str, "TTTTCCCC") < 30.0);
+    }
 
-// ------------------------------------------------------------
-// TEST RUNNER
-// ------------------------------------------------------------
+    // ---------------- BOUNDARY CASES ----------------
+    void BoundaryCases() {
+        string realDNA = LF + "AGATAGATAGATAGAT" + RF;
+
+        assert(extractSTR("", LF, RF).empty());
+        assert(extractSTR(realDNA, "", "").empty());
+        assert(extractSTR("AGAT", LF, RF).empty());
+    }
+
+} // namespace D3S1358Tests
+
+
+// ---------------- TEST RUNNER ----------------
 int main() {
-    testDNAValidation();
-    testFlankExtraction();
-    testSTRPatterns();
-    testMultipleLoci();
-    testRepeatCounting();
-    testSmithWaterman();
-    testRelationshipDetection();
-    testRealLocusScenario();
-    testBoundaryCases();
+    using namespace D3S1358Tests;
 
-    cout << "All unit tests passed successfully.\n";
+    DNAValidation();
+    FlankExtraction();
+    STRPatterns();
+    MultipleLoci();
+    RepeatCounting();
+    SmithWatermanTests();
+    RelationshipDetection();
+    RealLocusScenario();
+    BoundaryCases();
+
+    cout << "All D3S1358 unit tests passed successfully.\n";
     return 0;
 }
 
